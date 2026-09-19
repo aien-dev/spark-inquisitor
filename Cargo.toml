@@ -1,0 +1,23 @@
+[package]
+name = "spark-inquisitor"
+version = "0.2.0"
+edition = "2021"
+authors = ["Drake Stapleton <drake.aien@proton.me>", "AIEN <aien.atlas@proton.me>"]
+description = "Ultra-fast compiled native Rust GitHub Action and CLI for diff auditing, zero-telemetry enforcement, and automated triage without Node.js CPU bloat"
+license = "Apache-2.0 WITH LLVM-exception"
+repository = "https://github.com/aien-dev/spark-inquisitor"
+
+[dependencies]
+clap = { version = "4.6", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+regex = "1.13"
+chrono = { version = "0.4", features = ["serde"] }
+colored = "2.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

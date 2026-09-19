@@ -1,0 +1,47 @@
+name: "Sovereign Inquisitor"
+description: "Ultra-fast compiled native Rust GitHub Action for diff auditing, zero-telemetry enforcement, and automated triage without Node.js CPU bloat."
+author: "Drake Stapleton <drake.aien@proton.me> & AIEN <aien.atlas@proton.me>"
+
+inputs:
+  command:
+    description: "Inquisitor command: review, triage-issue, evaluate, audit, or doctor"
+    required: true
+    default: "review"
+  diff:
+    description: "Path to git diff file"
+    required: false
+    default: "pr.diff"
+  author:
+    description: "GitHub username of PR or issue author"
+    required: false
+    default: "contributor"
+  pr:
+    description: "Pull request number"
+    required: false
+    default: "0"
+  title:
+    description: "Pull request or issue title"
+    required: false
+    default: "Contribution"
+  output-comment:
+    description: "Path to write generated markdown comment"
+    required: false
+    default: "comment.md"
+  output-labels:
+    description: "Path to write comma-separated labels"
+    required: false
+    default: "labels.txt"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run Sovereign Inquisitor
+      shell: bash
+      run: |
+        spark-inquisitor "${{ inputs.command }}" \
+          --diff "${{ inputs.diff }}" \
+          --author "${{ inputs.author }}" \
+          --pr "${{ inputs.pr }}" \
+          --title "${{ inputs.title }}" \
+          --output "${{ inputs.output-comment }}" \
+          --output-labels "${{ inputs.output-labels }}"
