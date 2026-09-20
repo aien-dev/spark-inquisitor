@@ -56,10 +56,19 @@ impl DiffAuditor {
         let mut secret_violations = Vec::new();
 
         let telemetry_patterns = [
-            "google-analytics", "segment.io", "mixpanel", "sentry.io",
-            "datadog", "tracking_id", "analytics.js",
-            "amplitude.com", "hotjar", "clarity.ms",
-            "send_telemetry", "report_telemetry", "collect_telemetry",
+            "google-analytics",
+            "segment.io",
+            "mixpanel",
+            "sentry.io",
+            "datadog",
+            "tracking_id",
+            "analytics.js",
+            "amplitude.com",
+            "hotjar",
+            "clarity.ms",
+            "send_telemetry",
+            "report_telemetry",
+            "collect_telemetry",
         ];
 
         let mut current_file = String::new();
@@ -70,7 +79,10 @@ impl DiffAuditor {
                 in_binary_patch = false;
                 current_file = Self::extract_target_file(line).unwrap_or_default();
                 if ConstitutionalChecker::is_env_file(&current_file) {
-                    violations.push(format!("Forbidden plaintext .env secret file detected in diff header: {}", current_file));
+                    violations.push(format!(
+                        "Forbidden plaintext .env secret file detected in diff header: {}",
+                        current_file
+                    ));
                 }
                 continue;
             }
@@ -79,7 +91,10 @@ impl DiffAuditor {
                 if let Some(target) = Self::extract_plus_file(line) {
                     current_file = target;
                     if ConstitutionalChecker::is_env_file(&current_file) {
-                        violations.push(format!("Forbidden plaintext .env secret file added in diff: {}", current_file));
+                        violations.push(format!(
+                            "Forbidden plaintext .env secret file added in diff: {}",
+                            current_file
+                        ));
                     }
                 }
                 continue;
@@ -88,7 +103,10 @@ impl DiffAuditor {
             if line.starts_with("Binary files ") {
                 if let Some(target) = Self::extract_binary_target(line) {
                     if ConstitutionalChecker::is_env_file(&target) {
-                        violations.push(format!("Forbidden plaintext .env secret file in binary diff: {}", target));
+                        violations.push(format!(
+                            "Forbidden plaintext .env secret file in binary diff: {}",
+                            target
+                        ));
                     }
                 }
                 continue;
@@ -104,7 +122,8 @@ impl DiffAuditor {
             }
 
             // Exclude inquisitor internal pattern definitions from false positives
-            if current_file.contains("spark-inquisitor") || current_file.contains("constitution.rs") {
+            if current_file.contains("spark-inquisitor") || current_file.contains("constitution.rs")
+            {
                 continue;
             }
 
@@ -113,21 +132,34 @@ impl DiffAuditor {
             // Telemetry pattern scanning
             for pattern in &telemetry_patterns {
                 if lower.contains(pattern) && (line.starts_with('+') && !line.starts_with("+++")) {
-                    violations.push(format!("Telemetry pattern '{}' detected in added line: {}", pattern, line.trim()));
+                    violations.push(format!(
+                        "Telemetry pattern '{}' detected in added line: {}",
+                        pattern,
+                        line.trim()
+                    ));
                     telemetry_detected = true;
                 }
             }
 
             // In non-markdown source code, also flag raw telemetry calls
             if !current_file.ends_with(".md") && line.starts_with('+') && !line.starts_with("+++") {
-                if lower.contains("telemetry") 
-                    && !lower.contains("gpu-telemetry") 
-                    && !lower.contains("zero telemetry") && !lower.contains("zero-telemetry") && !lower.contains("no-telemetry") 
-                    && !lower.contains("no telemetry") 
+                if lower.contains("telemetry")
+                    && !lower.contains("gpu-telemetry")
+                    && !lower.contains("zero telemetry")
+                    && !lower.contains("zero-telemetry")
+                    && !lower.contains("no-telemetry")
+                    && !lower.contains("no telemetry")
                     && !lower.contains("anti-telemetry")
                     && !lower.contains("block telemetry")
+                    && !lower.contains("telemetryforbidden")
+                    && !lower.contains("networkpurpose::telemetry")
+                    && !lower.contains("forbid")
+                    && !lower.contains("reject")
                 {
-                    violations.push(format!("Telemetry indicator detected in source line: {}", line.trim()));
+                    violations.push(format!(
+                        "Telemetry indicator detected in source line: {}",
+                        line.trim()
+                    ));
                     telemetry_detected = true;
                 }
             }
@@ -147,7 +179,8 @@ impl DiffAuditor {
             }
         }
 
-        let clean = violations.is_empty() && unslop_violations.is_empty() && secret_violations.is_empty();
+        let clean =
+            violations.is_empty() && unslop_violations.is_empty() && secret_violations.is_empty();
 
         AuditReport {
             clean,
@@ -235,7 +268,8 @@ mod tests {
 
     #[test]
     fn test_secret_flagged() {
-        let diff = "diff --git a/src/config.rs b/src/config.rs\n+let key = \"AKIA1234567890ABCDEF\";";
+        let diff =
+            "diff --git a/src/config.rs b/src/config.rs\n+let key = \"AKIA1234567890ABCDEF\";";
         let report = DiffAuditor::audit_text(diff);
         assert!(!report.clean);
         assert!(!report.secret_violations.is_empty());

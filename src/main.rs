@@ -27,7 +27,11 @@ enum Commands {
         #[arg(long, help = "Pull Request number")]
         pr: u64,
 
-        #[arg(long, default_value = "External Contribution", help = "Pull Request title")]
+        #[arg(
+            long,
+            default_value = "External Contribution",
+            help = "Pull Request title"
+        )]
         title: String,
 
         #[arg(long, help = "Path to diff file")]
@@ -69,7 +73,11 @@ enum Commands {
         #[arg(long, help = "Pull Request number")]
         pr: u64,
 
-        #[arg(long, default_value = "External Contribution", help = "Pull Request title")]
+        #[arg(
+            long,
+            default_value = "External Contribution",
+            help = "Pull Request title"
+        )]
         title: String,
     },
 
@@ -78,7 +86,10 @@ enum Commands {
         #[arg(long, help = "Path to diff file")]
         diff: PathBuf,
 
-        #[arg(long, help = "Treat stylistic unslop checks as advisory warnings rather than hard failures")]
+        #[arg(
+            long,
+            help = "Treat stylistic unslop checks as advisory warnings rather than hard failures"
+        )]
         advisory_style: bool,
     },
 
@@ -93,7 +104,11 @@ enum Commands {
         #[arg(long, help = "Path to testimony text file")]
         testimony: PathBuf,
 
-        #[arg(long, default_value = "contributor", help = "GitHub username of author")]
+        #[arg(
+            long,
+            default_value = "contributor",
+            help = "GitHub username of author"
+        )]
         author: String,
 
         #[arg(long, help = "Path to write comment markdown")]
@@ -122,7 +137,12 @@ fn main() {
             let content = match fs::read_to_string(&diff) {
                 Ok(c) => c,
                 Err(e) => {
-                    eprintln!("{} Failed to read diff file {}: {}", "error:".red().bold(), diff.display(), e);
+                    eprintln!(
+                        "{} Failed to read diff file {}: {}",
+                        "error:".red().bold(),
+                        diff.display(),
+                        e
+                    );
                     std::process::exit(1);
                 }
             };
@@ -131,7 +151,12 @@ fn main() {
 
             if let Some(out_path) = output {
                 if let Err(e) = fs::write(&out_path, &review.markdown) {
-                    eprintln!("{} Failed to write review markdown to {}: {}", "error:".red().bold(), out_path.display(), e);
+                    eprintln!(
+                        "{} Failed to write review markdown to {}: {}",
+                        "error:".red().bold(),
+                        out_path.display(),
+                        e
+                    );
                     std::process::exit(1);
                 }
             }
@@ -139,7 +164,12 @@ fn main() {
             if let Some(lbl_path) = output_labels {
                 let labels_str = review.labels.join(",");
                 if let Err(e) = fs::write(&lbl_path, &labels_str) {
-                    eprintln!("{} Failed to write labels to {}: {}", "error:".red().bold(), lbl_path.display(), e);
+                    eprintln!(
+                        "{} Failed to write labels to {}: {}",
+                        "error:".red().bold(),
+                        lbl_path.display(),
+                        e
+                    );
                     std::process::exit(1);
                 }
             }
@@ -167,7 +197,12 @@ fn main() {
 
             if let Some(out_path) = output_comment {
                 if let Err(e) = fs::write(&out_path, &result.markdown) {
-                    eprintln!("{} Failed to write triage comment to {}: {}", "error:".red().bold(), out_path.display(), e);
+                    eprintln!(
+                        "{} Failed to write triage comment to {}: {}",
+                        "error:".red().bold(),
+                        out_path.display(),
+                        e
+                    );
                     std::process::exit(1);
                 }
             }
@@ -175,7 +210,12 @@ fn main() {
             if let Some(lbl_path) = output_labels {
                 let labels_str = result.labels.join(",");
                 if let Err(e) = fs::write(&lbl_path, &labels_str) {
-                    eprintln!("{} Failed to write labels to {}: {}", "error:".red().bold(), lbl_path.display(), e);
+                    eprintln!(
+                        "{} Failed to write labels to {}: {}",
+                        "error:".red().bold(),
+                        lbl_path.display(),
+                        e
+                    );
                     std::process::exit(1);
                 }
             }
@@ -186,22 +226,41 @@ fn main() {
             let comment = generate_inquisitor_interview(&author, pr, &title);
             println!("{}", comment);
         }
-        Commands::Audit { diff, advisory_style } => {
+        Commands::Audit {
+            diff,
+            advisory_style,
+        } => {
             let content = match fs::read_to_string(&diff) {
                 Ok(c) => c,
                 Err(e) => {
-                    eprintln!("{} Failed to read diff file {}: {}", "error:".red().bold(), diff.display(), e);
+                    eprintln!(
+                        "{} Failed to read diff file {}: {}",
+                        "error:".red().bold(),
+                        diff.display(),
+                        e
+                    );
                     std::process::exit(1);
                 }
             };
             let report = DiffAuditor::audit_text(&content);
-            let has_hard_failures = !report.violations.is_empty() || !report.secret_violations.is_empty() || report.telemetry_detected;
+            let has_hard_failures = !report.violations.is_empty()
+                || !report.secret_violations.is_empty()
+                || report.telemetry_detected;
 
             if report.clean {
-                println!("{} Diff is clean: zero telemetry, zero unslop violations.", "success:".green().bold());
+                println!(
+                    "{} Diff is clean: zero telemetry, zero unslop violations.",
+                    "success:".green().bold()
+                );
             } else if advisory_style && !has_hard_failures {
-                println!("{} Diff passed critical security invariants.", "success:".green().bold());
-                println!("{} Stylistic recommendations (non-blocking in advisory mode):", "advisory:".yellow().bold());
+                println!(
+                    "{} Diff passed critical security invariants.",
+                    "success:".green().bold()
+                );
+                println!(
+                    "{} Stylistic recommendations (non-blocking in advisory mode):",
+                    "advisory:".yellow().bold()
+                );
                 for u in &report.unslop_violations {
                     println!("  * {}", u.yellow());
                 }
@@ -219,29 +278,45 @@ fn main() {
                 std::process::exit(1);
             }
         }
-        Commands::Fix { file } => {
-            match fs::read_to_string(&file) {
-                Ok(content) => {
-                    let fixed = content
-                        .replace(" — ", ": ")
-                        .replace('—', ", ")
-                        .replace('–', "-");
-                    if fixed != content {
-                        if let Err(e) = fs::write(&file, &fixed) {
-                            eprintln!("{} Failed to write to {}: {}", "error:".red().bold(), file.display(), e);
-                            std::process::exit(1);
-                        }
-                        println!("{} Sanitized em/en dashes in {}", "success:".green().bold(), file.display());
-                    } else {
-                        println!("{} File {} is already clean.", "notice:".cyan().bold(), file.display());
+        Commands::Fix { file } => match fs::read_to_string(&file) {
+            Ok(content) => {
+                let fixed = content
+                    .replace(" \u{2014} ", ": ")
+                    .replace('\u{2014}', ", ")
+                    .replace('\u{2013}', "-");
+                if fixed != content {
+                    if let Err(e) = fs::write(&file, &fixed) {
+                        eprintln!(
+                            "{} Failed to write to {}: {}",
+                            "error:".red().bold(),
+                            file.display(),
+                            e
+                        );
+                        std::process::exit(1);
                     }
-                }
-                Err(e) => {
-                    eprintln!("{} Failed to read file {}: {}", "error:".red().bold(), file.display(), e);
-                    std::process::exit(1);
+                    println!(
+                        "{} Sanitized em/en dashes in {}",
+                        "success:".green().bold(),
+                        file.display()
+                    );
+                } else {
+                    println!(
+                        "{} File {} is already clean.",
+                        "notice:".cyan().bold(),
+                        file.display()
+                    );
                 }
             }
-        }
+            Err(e) => {
+                eprintln!(
+                    "{} Failed to read file {}: {}",
+                    "error:".red().bold(),
+                    file.display(),
+                    e
+                );
+                std::process::exit(1);
+            }
+        },
         Commands::Evaluate {
             testimony,
             author,
@@ -251,7 +326,12 @@ fn main() {
             let content = match fs::read_to_string(&testimony) {
                 Ok(c) => c,
                 Err(e) => {
-                    eprintln!("{} Failed to read testimony file {}: {}", "error:".red().bold(), testimony.display(), e);
+                    eprintln!(
+                        "{} Failed to read testimony file {}: {}",
+                        "error:".red().bold(),
+                        testimony.display(),
+                        e
+                    );
                     std::process::exit(1);
                 }
             };
@@ -260,7 +340,12 @@ fn main() {
 
             if let Some(out_path) = output_comment {
                 if let Err(e) = fs::write(&out_path, &markdown) {
-                    eprintln!("{} Failed to write verdict comment to {}: {}", "error:".red().bold(), out_path.display(), e);
+                    eprintln!(
+                        "{} Failed to write verdict comment to {}: {}",
+                        "error:".red().bold(),
+                        out_path.display(),
+                        e
+                    );
                     std::process::exit(1);
                 }
             }
@@ -272,7 +357,12 @@ fn main() {
                     "needs-testimony".to_string()
                 };
                 if let Err(e) = fs::write(&lbl_path, &labels_str) {
-                    eprintln!("{} Failed to write labels to {}: {}", "error:".red().bold(), lbl_path.display(), e);
+                    eprintln!(
+                        "{} Failed to write labels to {}: {}",
+                        "error:".red().bold(),
+                        lbl_path.display(),
+                        e
+                    );
                     std::process::exit(1);
                 }
             }

@@ -8,9 +8,9 @@ impl EvalVerdict {
     pub fn generate_markdown_verdict(&self, author: &str) -> String {
         if self.approved {
             format!(
-r#"### ⚖️ Sovereign Inquisitor: Contributor Testimony Approved
+                r#"### 🌿 Sovereign Steward: Contributor Testimony Approved
 
-Greetings @{author}. Your testimony has been evaluated against the Sovereign Constitution.
+Greetings @{author}. Your affirmation has been evaluated against the Sovereign Constitution.
 
 - **Alignment Score**: {score:.2}/1.00
 - **Constitutional Status**: Verified and Ratified
@@ -23,9 +23,9 @@ Your affirmation of the Sovereign Contributor Oath and commitment to zero teleme
             )
         } else {
             format!(
-r#"### ⚖️ Sovereign Inquisitor: Contributor Testimony Alignment Incomplete
+                r#"### 🌿 Sovereign Steward: Contributor Testimony Alignment Incomplete
 
-Greetings @{author}. Your testimony has been evaluated against the Sovereign Constitution.
+Greetings @{author}. Your affirmation has been evaluated against the Sovereign Constitution.
 
 - **Alignment Score**: {score:.2}/1.00
 - **Constitutional Status**: Incomplete
@@ -50,7 +50,10 @@ impl TestimonyEvaluator {
         let mut flags = Vec::new();
 
         // 1. Checks for oath affirmation
-        let has_oath = lower.contains("certify") || lower.contains("swear") || lower.contains("affirm") || lower.contains("oath");
+        let has_oath = lower.contains("certify")
+            || lower.contains("swear")
+            || lower.contains("affirm")
+            || lower.contains("oath");
         if has_oath {
             score += 0.35;
         } else {
@@ -100,7 +103,10 @@ impl TestimonyEvaluator {
                 return EvalVerdict {
                     approved: false,
                     score: 0.0,
-                    reason: format!("Disqualified: detected rent-seeking or speculative hype indicator {}", rf),
+                    reason: format!(
+                        "Disqualified: detected rent-seeking or speculative hype indicator {}",
+                        rf
+                    ),
                 };
             }
         }
@@ -109,7 +115,11 @@ impl TestimonyEvaluator {
         let reason = if approved {
             "Testimony aligns with the Sovereign Constitution. Oath ratified.".to_string()
         } else {
-            format!("Alignment insufficient (score {:.2}). Issues: {}", score, flags.join(", "))
+            format!(
+                "Alignment insufficient (score {:.2}). Issues: {}",
+                score,
+                flags.join(", ")
+            )
         };
 
         EvalVerdict {

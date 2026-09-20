@@ -26,7 +26,11 @@ fn test_cli_doctor_exit_zero() {
 fn test_cli_audit_clean_diff_exit_zero() {
     let bin = env!("CARGO_BIN_EXE_spark-inquisitor");
     let diff_path = get_temp_path("clean.diff");
-    fs::write(&diff_path, "diff --git a/clean.rs b/clean.rs\n+pub fn ok() -> bool { true }\n").unwrap();
+    fs::write(
+        &diff_path,
+        "diff --git a/clean.rs b/clean.rs\n+pub fn ok() -> bool { true }\n",
+    )
+    .unwrap();
 
     let output = Command::new(bin)
         .arg("audit")
@@ -46,7 +50,11 @@ fn test_cli_audit_clean_diff_exit_zero() {
 fn test_cli_audit_telemetry_diff_exit_nonzero() {
     let bin = env!("CARGO_BIN_EXE_spark-inquisitor");
     let diff_path = get_temp_path("telemetry.diff");
-    fs::write(&diff_path, "diff --git a/bad.rs b/bad.rs\n+let _ = send_telemetry(\"google-analytics\");\n").unwrap();
+    fs::write(
+        &diff_path,
+        "diff --git a/bad.rs b/bad.rs\n+let _ = send_telemetry(\"google-analytics\");\n",
+    )
+    .unwrap();
 
     let output = Command::new(bin)
         .arg("audit")
@@ -68,7 +76,11 @@ fn test_cli_audit_telemetry_diff_exit_nonzero() {
 fn test_cli_audit_em_dash_diff_exit_nonzero() {
     let bin = env!("CARGO_BIN_EXE_spark-inquisitor");
     let diff_path = get_temp_path("dash.diff");
-    fs::write(&diff_path, "diff --git a/dash.rs b/dash.rs\n+// note \u{2014} bad dash\n").unwrap();
+    fs::write(
+        &diff_path,
+        "diff --git a/dash.rs b/dash.rs\n+// note \u{2014} bad dash\n",
+    )
+    .unwrap();
 
     let output = Command::new(bin)
         .arg("audit")
@@ -90,7 +102,11 @@ fn test_cli_audit_em_dash_diff_exit_nonzero() {
 fn test_cli_audit_secret_diff_exit_nonzero() {
     let bin = env!("CARGO_BIN_EXE_spark-inquisitor");
     let diff_path = get_temp_path("secret.diff");
-    fs::write(&diff_path, "diff --git a/sec.rs b/sec.rs\n+const KEY: &str = \"AKIA1234567890ABCDEF\";\n").unwrap();
+    fs::write(
+        &diff_path,
+        "diff --git a/sec.rs b/sec.rs\n+const KEY: &str = \"AKIA1234567890ABCDEF\";\n",
+    )
+    .unwrap();
 
     let output = Command::new(bin)
         .arg("audit")
@@ -111,7 +127,11 @@ fn test_cli_audit_secret_diff_exit_nonzero() {
 fn test_cli_review_clean_diff_exit_zero() {
     let bin = env!("CARGO_BIN_EXE_spark-inquisitor");
     let diff_path = get_temp_path("rev_clean.diff");
-    fs::write(&diff_path, "diff --git a/clean.rs b/clean.rs\n+pub fn check() -> i32 { 42 }\n").unwrap();
+    fs::write(
+        &diff_path,
+        "diff --git a/clean.rs b/clean.rs\n+pub fn check() -> i32 { 42 }\n",
+    )
+    .unwrap();
 
     let output = Command::new(bin)
         .arg("review")
@@ -138,7 +158,11 @@ fn test_cli_review_clean_diff_exit_zero() {
 fn test_cli_review_violating_diff_exit_nonzero() {
     let bin = env!("CARGO_BIN_EXE_spark-inquisitor");
     let diff_path = get_temp_path("rev_bad.diff");
-    fs::write(&diff_path, "diff --git a/bad.rs b/bad.rs\n+// This is a game-changer feature\n").unwrap();
+    fs::write(
+        &diff_path,
+        "diff --git a/bad.rs b/bad.rs\n+// This is a game-changer feature\n",
+    )
+    .unwrap();
 
     let output = Command::new(bin)
         .arg("review")
@@ -214,7 +238,11 @@ fn test_cli_evaluate_invalid_testimony_exit_nonzero() {
 fn test_cli_audit_em_dash_with_advisory_style_exit_zero() {
     let bin = env!("CARGO_BIN_EXE_spark-inquisitor");
     let diff_path = get_temp_path("advisory_dash.diff");
-    fs::write(&diff_path, "diff --git a/dash.rs b/dash.rs\n+// note \u{2014} bad dash\n").unwrap();
+    fs::write(
+        &diff_path,
+        "diff --git a/dash.rs b/dash.rs\n+// note \u{2014} bad dash\n",
+    )
+    .unwrap();
 
     let output = Command::new(bin)
         .arg("audit")

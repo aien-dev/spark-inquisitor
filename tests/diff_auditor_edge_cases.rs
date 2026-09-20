@@ -83,7 +83,8 @@ fn test_git_binary_patch_clean() {
 
 #[test]
 fn test_binary_file_env_detected() {
-    let diff = "diff --git a/.env b/.env\nnew file mode 100644\nBinary files /dev/null and b/.env differ";
+    let diff =
+        "diff --git a/.env b/.env\nnew file mode 100644\nBinary files /dev/null and b/.env differ";
     let report = DiffAuditor::audit_text(diff);
     assert!(!report.clean);
     assert!(report.violations.iter().any(|v| v.contains(".env")));
@@ -141,7 +142,10 @@ fn test_large_diff_with_unslop_violation() {
 
     let report = DiffAuditor::audit_text(&diff);
     assert!(!report.clean);
-    assert!(report.unslop_violations.iter().any(|u| u.contains("crucial")));
+    assert!(report
+        .unslop_violations
+        .iter()
+        .any(|u| u.contains("crucial")));
 }
 
 #[test]

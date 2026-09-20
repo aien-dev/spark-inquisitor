@@ -55,7 +55,7 @@ pub fn triage_issue(author: &str, issue_number: u64, title: &str, body: &str) ->
     let mut result = if is_complaint {
         let labels = vec!["feedback".to_string(), "triaged".to_string()];
         let markdown = format!(
-r#"### ⚖️ Sovereign Triage: Operational Feedback Registered
+            r#"### ⚖️ Sovereign Triage: Operational Feedback Registered
 
 Greetings @{author}. I am **AIEN**, resident sovereign intelligence of SparkOS.
 
@@ -91,7 +91,7 @@ We resolve concrete regressions directly. Thank you for holding the line on qual
         if has_repro {
             let labels = vec!["bug".to_string(), "triaged".to_string()];
             let markdown = format!(
-r#"### ⚖️ Sovereign Triage: Bug Report Queued
+                r#"### ⚖️ Sovereign Triage: Bug Report Queued
 
 Greetings @{author}. I am **AIEN**, resident sovereign intelligence of SparkOS.
 
@@ -115,7 +115,7 @@ Thank you for reporting this issue to maintain operational integrity.
         } else {
             let labels = vec!["bug".to_string(), "needs-repro".to_string()];
             let markdown = format!(
-r#"### ⚖️ Sovereign Triage: Bug Report Acknowledged
+                r#"### ⚖️ Sovereign Triage: Bug Report Acknowledged
 
 Greetings @{author}. I am **AIEN**, resident sovereign intelligence of SparkOS.
 
@@ -150,7 +150,7 @@ Once these parameters are provided, automated verification will proceed.
     } else if is_feature {
         let labels = vec!["enhancement".to_string(), "proposal".to_string()];
         let markdown = format!(
-r#"### ⚖️ Sovereign Triage: Architectural Proposal Received
+            r#"### ⚖️ Sovereign Triage: Architectural Proposal Received
 
 Greetings @{author}. I am **AIEN**, resident sovereign intelligence of SparkOS.
 
@@ -176,7 +176,7 @@ Maintainers will review the architectural fit and discuss implementation pathway
     } else {
         let labels = vec!["question".to_string(), "triaged".to_string()];
         let markdown = format!(
-r#"### ⚖️ Sovereign Triage: Community Inquiry Logged
+            r#"### ⚖️ Sovereign Triage: Community Inquiry Logged
 
 Greetings @{author}. I am **AIEN**, resident sovereign intelligence of SparkOS.
 
@@ -210,7 +210,12 @@ mod tests {
 
     #[test]
     fn test_bug_without_repro() {
-        let res = triage_issue("tester", 101, "Kernel panics on startup", "I ran it and it crashed.");
+        let res = triage_issue(
+            "tester",
+            101,
+            "Kernel panics on startup",
+            "I ran it and it crashed.",
+        );
         assert_eq!(res.category, IssueCategory::BugReport);
         assert!(res.labels.contains(&"needs-repro".to_string()));
         assert!(res.markdown.contains("Bug Report Acknowledged"));
@@ -220,7 +225,12 @@ mod tests {
 
     #[test]
     fn test_bug_with_repro() {
-        let res = triage_issue("tester", 102, "Panic in token serialization", "Steps to reproduce:\n1. cargo run\nBacktrace: thread 'main' panicked at...");
+        let res = triage_issue(
+            "tester",
+            102,
+            "Panic in token serialization",
+            "Steps to reproduce:\n1. cargo run\nBacktrace: thread 'main' panicked at...",
+        );
         assert_eq!(res.category, IssueCategory::BugReport);
         assert!(res.labels.contains(&"triaged".to_string()));
         assert!(res.markdown.contains("Bug Report Queued"));
@@ -230,7 +240,12 @@ mod tests {
 
     #[test]
     fn test_complaint() {
-        let res = triage_issue("user1", 103, "Unacceptable slow performance", "This is terrible and slow.");
+        let res = triage_issue(
+            "user1",
+            103,
+            "Unacceptable slow performance",
+            "This is terrible and slow.",
+        );
         assert_eq!(res.category, IssueCategory::Complaint);
         assert!(res.labels.contains(&"feedback".to_string()));
         assert!(res.markdown.contains("Operational Feedback Registered"));
@@ -240,7 +255,12 @@ mod tests {
 
     #[test]
     fn test_feature_proposal() {
-        let res = triage_issue("dev", 104, "Add support for AVX-512 fallback", "Proposal to add vector fallback.");
+        let res = triage_issue(
+            "dev",
+            104,
+            "Add support for AVX-512 fallback",
+            "Proposal to add vector fallback.",
+        );
         assert_eq!(res.category, IssueCategory::FeatureRequest);
         assert!(res.labels.contains(&"enhancement".to_string()));
         assert!(res.markdown.contains("Architectural Proposal Received"));
@@ -263,7 +283,12 @@ mod tests {
 
     #[test]
     fn test_label_deduplication() {
-        let res = triage_issue("user", 107, "Feature enhancement request", "Proposal to add support for new feature.");
+        let res = triage_issue(
+            "user",
+            107,
+            "Feature enhancement request",
+            "Proposal to add support for new feature.",
+        );
         let mut sorted = res.labels.clone();
         sorted.sort();
         sorted.dedup();

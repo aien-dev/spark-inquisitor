@@ -7,7 +7,12 @@ pub struct PrReview {
     pub labels: Vec<String>,
 }
 
-pub fn generate_pr_review(author: &str, pr_number: u64, pr_title: &str, diff_text: &str) -> PrReview {
+pub fn generate_pr_review(
+    author: &str,
+    pr_number: u64,
+    pr_title: &str,
+    diff_text: &str,
+) -> PrReview {
     let report = DiffAuditor::audit_text(diff_text);
     let mut labels = Vec::new();
 
@@ -16,7 +21,7 @@ pub fn generate_pr_review(author: &str, pr_number: u64, pr_title: &str, diff_tex
         labels.push("sovereign-audit-passed".to_string());
         let interview = generate_inquisitor_interview(author, pr_number, pr_title);
         format!(
-r#"### ⚖️ Sovereign Code Review & Alignment Gate
+            r#"### ⚖️ Sovereign Code Review & Alignment Gate
 
 Greetings @{author}. I am **AIEN**, resident sovereign intelligence of SparkOS.
 
@@ -37,7 +42,7 @@ Your pull request **#{pr_number}** ("{pr_title}") has undergone automated consti
     } else {
         labels.push("sovereign-audit-failed".to_string());
         format!(
-r#"### ⚖️ Sovereign Code Review & Alignment Gate: FAILED
+            r#"### ⚖️ Sovereign Code Review & Alignment Gate: FAILED
 
 Greetings @{author}. I am **AIEN**, resident sovereign intelligence of SparkOS.
 
@@ -77,11 +82,13 @@ mod tests {
         let review = generate_pr_review("alice", 77, "feat: clean helper", diff);
         assert!(review.report.clean);
         assert!(review.labels.contains(&"needs-testimony".to_string()));
-        assert!(review.labels.contains(&"sovereign-audit-passed".to_string()));
+        assert!(review
+            .labels
+            .contains(&"sovereign-audit-passed".to_string()));
         assert!(review.markdown.contains("Constitutional Diff Audit: PASS"));
         assert!(review.markdown.contains("Contributor Alignment Interview"));
-        assert!(!review.markdown.contains('—'));
-        assert!(!review.markdown.contains('–'));
+        assert!(!review.markdown.contains('\u{2014}'));
+        assert!(!review.markdown.contains('\u{2013}'));
     }
 
     #[test]
@@ -89,9 +96,13 @@ mod tests {
         let diff = "diff --git a/src/lib.rs b/src/lib.rs\n+// This game-changer adds tracking\n+let _ = send_telemetry(\"mixpanel\");";
         let review = generate_pr_review("bob", 78, "feat: bad PR", diff);
         assert!(!review.report.clean);
-        assert!(review.labels.contains(&"sovereign-audit-failed".to_string()));
-        assert!(review.markdown.contains("Constitutional Diff Audit: FAILED"));
-        assert!(!review.markdown.contains('—'));
-        assert!(!review.markdown.contains('–'));
+        assert!(review
+            .labels
+            .contains(&"sovereign-audit-failed".to_string()));
+        assert!(review
+            .markdown
+            .contains("Constitutional Diff Audit: FAILED"));
+        assert!(!review.markdown.contains('\u{2014}'));
+        assert!(!review.markdown.contains('\u{2013}'));
     }
 }
