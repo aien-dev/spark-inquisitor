@@ -1,6 +1,6 @@
 # spark-inquisitor
 
-### Ultra-Fast Native Rust GitHub Action & CLI for Diff Auditing and Issue Triage
+### Native Rust GitHub Action & CLI for Diff Auditing and Issue Triage
 
 `spark-inquisitor` is a compiled native Rust gatekeeper and automated code reviewer engineered to replace heavy JavaScript and Docker CI actions. It executes in **under 2 milliseconds** with **zero CPU thrashing**, zero Node.js dependencies, and zero external telemetry.
 
