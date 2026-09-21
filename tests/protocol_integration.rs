@@ -1,9 +1,10 @@
 use aien_evaluation_protocol::{
-    CanaryRollbackHarness, CryptographicTier, EvaluationPlan, Evaluator, EvaluatorDescriptor,
-    EvaluatorStatus, Verdict, VerifierIdentity,
+    VerifierSigner,
+    CanaryRollbackHarness, EvaluationPlan, Evaluator, EvaluatorDescriptor,
+    EvaluatorStatus, SoftwareP256Signer, Verdict, VerifierIdentity,
 };
 use aien_protocol_types::{ArtifactRef, Digest32, EvaluationId, Timestamp};
-use p256::ecdsa::{SigningKey, VerifyingKey};
+use p256::ecdsa::SigningKey;
 use spark_inquisitor::{InquisitorConstitutionalEvaluator, InquisitorDiffEvaluator};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -109,16 +110,16 @@ async fn test_inquisitor_constitutional_evaluator() {
 #[tokio::test]
 async fn test_inquisitor_canary_rollback_integration() {
     let signing_key = SigningKey::from_slice(&[88u8; 32]).expect("valid p256 signing key");
+    let signer = Arc::new(SoftwareP256Signer::new(signing_key));
     let harness = CanaryRollbackHarness::new(
         VerifierIdentity {
             principal_id: "spark-inquisitor-sentinel".to_string(),
-            key_id: "inquisitor-tpm-key".to_string(),
+            key_id: signer.key_fingerprint(),
             trust_epoch: 1,
             trusted_build_digest: Digest32([0x44; 32]),
             policy_bundle_digest: Digest32([0x55; 32]),
         },
-        signing_key,
-        CryptographicTier::Tier2SoftwareKey,
+        signer.clone(),
     );
 
     let plan = create_test_plan();
@@ -152,6 +153,6 @@ async fn test_inquisitor_canary_rollback_integration() {
     assert!(rollback_triggered.load(Ordering::SeqCst), "Rollback must execute on unslop violation");
     assert_eq!(receipt.receipt.verdict, Verdict::Fail);
 
-    let verifying_key = VerifyingKey::from(&harness.signing_key);
+    let verifying_key = signer.verifying_key();
     assert!(receipt.verify(&verifying_key).unwrap());
 }
