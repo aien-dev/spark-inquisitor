@@ -14,6 +14,12 @@ serde_json = "1.0"
 regex = "1.13"
 chrono = { version = "0.4", features = ["serde"] }
 colored = "2.2"
+uuid = { version = "1.8", features = ["v4"] }
+async-trait = "0.1"
+tokio = { version = "1.40", features = ["full"] }
+p256 = { version = "0.14.0", features = ["ecdsa"] }
+aien-protocol-types = { path = "../aien-protocols/crates/aien-protocol-types" }
+aien-evaluation-protocol = { path = "../aien-protocols/crates/aien-evaluation-protocol" }
 
 [profile.release]
 opt-level = 3

@@ -14,3 +14,6 @@ pub use evaluator::TestimonyEvaluator as Evaluator;
 pub use interview::generate_inquisitor_interview;
 pub use review::{generate_pr_review, PrReview};
 pub use triage::{triage_issue, IssueCategory, TriageResult};
+
+pub mod protocol_evaluator;
+pub use protocol_evaluator::{InquisitorConstitutionalEvaluator, InquisitorDiffEvaluator};
