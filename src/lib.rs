@@ -17,3 +17,6 @@ pub use triage::{triage_issue, IssueCategory, TriageResult};
 
 pub mod protocol_evaluator;
 pub use protocol_evaluator::{InquisitorConstitutionalEvaluator, InquisitorDiffEvaluator};
+
+pub mod probe_audit;
+pub use probe_audit::{run_probe_audit, InquisitorProbeEvaluator, ProbeAuditReport};
