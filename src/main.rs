@@ -118,6 +118,35 @@ enum Commands {
         output_labels: Option<PathBuf>,
     },
 
+    /// Audit a git diff with the sovereign native probe evaluation engine
+    Probe {
+        #[arg(long, help = "Path to diff file")]
+        diff: PathBuf,
+
+        #[arg(
+            long,
+            default_value = "reference",
+            help = "Probe backend: reference or http"
+        )]
+        backend: String,
+
+        #[arg(long, help = "Endpoint for the http backend")]
+        endpoint: Option<String>,
+
+        #[arg(
+            long,
+            default_value_t = 0.95,
+            help = "Minimum telemetry safety probability"
+        )]
+        min_telemetry: f64,
+
+        #[arg(long, default_value_t = 2.0, help = "Minimum quality score")]
+        min_quality: f64,
+
+        #[arg(long, help = "Path to write the probe report markdown")]
+        output: Option<PathBuf>,
+    },
+
     /// Run internal self-diagnostics
     Doctor,
 }
@@ -373,6 +402,69 @@ fn main() {
                 eprintln!("{} {}", "FAIL:".red().bold(), verdict.reason);
                 eprintln!("Score: {:.2}/1.00", verdict.score);
                 std::process::exit(1);
+            }
+        }
+        Commands::Probe {
+            diff,
+            backend,
+            endpoint,
+            min_telemetry,
+            min_quality,
+            output,
+        } => {
+            let content = match fs::read_to_string(&diff) {
+                Ok(c) => c,
+                Err(e) => {
+                    eprintln!(
+                        "{} Failed to read diff file {}: {}",
+                        "error:".red().bold(),
+                        diff.display(),
+                        e
+                    );
+                    std::process::exit(1);
+                }
+            };
+
+            let runtime = match tokio::runtime::Runtime::new() {
+                Ok(runtime) => runtime,
+                Err(e) => {
+                    eprintln!(
+                        "{} Failed to initialize async runtime: {}",
+                        "error:".red().bold(),
+                        e
+                    );
+                    std::process::exit(1);
+                }
+            };
+
+            match runtime.block_on(spark_inquisitor::run_probe_audit(
+                &content,
+                &backend,
+                endpoint,
+                min_telemetry,
+                min_quality,
+            )) {
+                Ok(report) => {
+                    if let Some(path) = &output {
+                        if let Err(e) = fs::write(path, &report.markdown) {
+                            eprintln!(
+                                "{} Failed to write probe report to {}: {}",
+                                "error:".red().bold(),
+                                path.display(),
+                                e
+                            );
+                            std::process::exit(1);
+                        }
+                    }
+                    println!("{}", report.markdown);
+                    if !report.clean {
+                        std::process::exit(1);
+                    }
+                }
+                Err(e) => {
+                    eprintln!("{} Probe audit failed: {}", "error:".red().bold(), e);
+                    std::process::exit(2);
+                }
             }
         }
         Commands::Doctor => {

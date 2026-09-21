@@ -4,7 +4,7 @@ author: "Drake Stapleton <drake.aien@proton.me> & AIEN <aien.atlas@proton.me>"
 
 inputs:
   command:
-    description: "Inquisitor command: review, triage-issue, interview, audit, evaluate, or doctor"
+    description: "Inquisitor command: review, triage-issue, interview, audit, evaluate, probe, or doctor"
     required: true
     default: "review"
   diff:
@@ -41,6 +41,11 @@ runs:
         case "${{ inputs.command }}" in
           doctor)
             spark-inquisitor doctor
+            ;;
+          probe)
+            spark-inquisitor probe \
+              --diff "${{ inputs.diff }}" \
+              --output "${{ inputs.output-comment }}"
             ;;
           review)
             spark-inquisitor review \
