@@ -4,7 +4,7 @@ author: "Drake Stapleton <drake.aien@proton.me> & AIEN <aien.atlas@proton.me>"
 
 inputs:
   command:
-    description: "Inquisitor command: review, triage-issue, evaluate, audit, or doctor"
+    description: "Inquisitor command: review, triage-issue, interview, audit, evaluate, or doctor"
     required: true
     default: "review"
   diff:
@@ -38,10 +38,46 @@ runs:
     - name: Run Sovereign Inquisitor
       shell: bash
       run: |
-        spark-inquisitor "${{ inputs.command }}" \
-          --diff "${{ inputs.diff }}" \
-          --author "${{ inputs.author }}" \
-          --pr "${{ inputs.pr }}" \
-          --title "${{ inputs.title }}" \
-          --output "${{ inputs.output-comment }}" \
-          --output-labels "${{ inputs.output-labels }}"
+        case "${{ inputs.command }}" in
+          doctor)
+            spark-inquisitor doctor
+            ;;
+          review)
+            spark-inquisitor review \
+              --diff "${{ inputs.diff }}" \
+              --author "${{ inputs.author }}" \
+              --pr "${{ inputs.pr }}" \
+              --title "${{ inputs.title }}" \
+              --output "${{ inputs.output-comment }}" \
+              --output-labels "${{ inputs.output-labels }}"
+            ;;
+          triage-issue)
+            spark-inquisitor triage-issue \
+              --author "${{ inputs.author }}" \
+              --issue "${{ inputs.pr }}" \
+              --title "${{ inputs.title }}" \
+              --body "${{ inputs.diff }}" \
+              --output-comment "${{ inputs.output-comment }}" \
+              --output-labels "${{ inputs.output-labels }}"
+            ;;
+          interview)
+            spark-inquisitor interview \
+              --author "${{ inputs.author }}" \
+              --pr "${{ inputs.pr }}" \
+              --title "${{ inputs.title }}"
+            ;;
+          audit)
+            spark-inquisitor audit \
+              --diff "${{ inputs.diff }}"
+            ;;
+          evaluate)
+            spark-inquisitor evaluate \
+              --testimony "${{ inputs.diff }}" \
+              --author "${{ inputs.author }}" \
+              --output-comment "${{ inputs.output-comment }}" \
+              --output-labels "${{ inputs.output-labels }}"
+            ;;
+          *)
+            spark-inquisitor "${{ inputs.command }}"
+            ;;
+        esac

@@ -3,3 +3,4 @@ Cargo.lock
 *.tar.gz
 *.sha256
 .crumb.local
+aien-protocols/
