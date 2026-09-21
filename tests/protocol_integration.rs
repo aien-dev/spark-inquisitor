@@ -1,7 +1,6 @@
 use aien_evaluation_protocol::{
-    VerifierSigner,
-    CanaryRollbackHarness, EvaluationPlan, Evaluator, EvaluatorDescriptor,
-    EvaluatorStatus, SoftwareP256Signer, Verdict, VerifierIdentity,
+    CanaryRollbackHarness, EvaluationPlan, Evaluator, EvaluatorDescriptor, EvaluatorStatus,
+    SoftwareP256Signer, Verdict, VerifierIdentity, VerifierSigner,
 };
 use aien_protocol_types::{ArtifactRef, Digest32, EvaluationId, Timestamp};
 use p256::ecdsa::SigningKey;
@@ -57,7 +56,10 @@ diff --git a/src/lib.rs b/src/lib.rs
     let plan = create_test_plan();
     let subject = plan.subject.clone();
 
-    let outcome = eval.evaluate(&plan, &subject).await.expect("evaluation error");
+    let outcome = eval
+        .evaluate(&plan, &subject)
+        .await
+        .expect("evaluation error");
     assert_eq!(outcome.status, EvaluatorStatus::Passed);
     assert!(outcome.findings.is_empty());
     assert_ne!(outcome.execution_digest, Digest32::ZERO);
@@ -81,13 +83,26 @@ diff --git a/src/lib.rs b/src/lib.rs
     let plan = create_test_plan();
     let subject = plan.subject.clone();
 
-    let outcome = eval.evaluate(&plan, &subject).await.expect("evaluation error");
+    let outcome = eval
+        .evaluate(&plan, &subject)
+        .await
+        .expect("evaluation error");
     assert_eq!(outcome.status, EvaluatorStatus::Failed);
     assert!(!outcome.findings.is_empty());
 
-    let rule_ids: Vec<&str> = outcome.findings.iter().map(|f| f.rule_id.as_str()).collect();
-    assert!(rule_ids.contains(&"CONSTITUTIONAL_TELEMETRY"), "Must catch posthog telemetry");
-    assert!(rule_ids.contains(&"SOVEREIGN_UNSLOP"), "Must catch em dash and buzzwords");
+    let rule_ids: Vec<&str> = outcome
+        .findings
+        .iter()
+        .map(|f| f.rule_id.as_str())
+        .collect();
+    assert!(
+        rule_ids.contains(&"CONSTITUTIONAL_TELEMETRY"),
+        "Must catch posthog telemetry"
+    );
+    assert!(
+        rule_ids.contains(&"SOVEREIGN_UNSLOP"),
+        "Must catch em dash and buzzwords"
+    );
 }
 
 #[tokio::test]
@@ -98,12 +113,18 @@ async fn test_inquisitor_constitutional_evaluator() {
     let plan = create_test_plan();
     let subject = plan.subject.clone();
 
-    let outcome_good = eval_good.evaluate(&plan, &subject).await.expect("evaluation error");
+    let outcome_good = eval_good
+        .evaluate(&plan, &subject)
+        .await
+        .expect("evaluation error");
     assert_eq!(outcome_good.status, EvaluatorStatus::Passed);
 
     let bad_testimony = "I decline to affirm the oath and intend to add tracking.";
     let eval_bad = InquisitorConstitutionalEvaluator::with_testimony(bad_testimony.to_string());
-    let outcome_bad = eval_bad.evaluate(&plan, &subject).await.expect("evaluation error");
+    let outcome_bad = eval_bad
+        .evaluate(&plan, &subject)
+        .await
+        .expect("evaluation error");
     assert_eq!(outcome_bad.status, EvaluatorStatus::Failed);
 }
 
@@ -150,7 +171,10 @@ async fn test_inquisitor_canary_rollback_integration() {
         .await
         .expect("harness evaluation failed");
 
-    assert!(rollback_triggered.load(Ordering::SeqCst), "Rollback must execute on unslop violation");
+    assert!(
+        rollback_triggered.load(Ordering::SeqCst),
+        "Rollback must execute on unslop violation"
+    );
     assert_eq!(receipt.receipt.verdict, Verdict::Fail);
 
     let verifying_key = signer.verifying_key();
