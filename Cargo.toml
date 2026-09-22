@@ -2,7 +2,7 @@
 name = "spark-inquisitor"
 version = "0.2.0"
 edition = "2021"
-authors = ["Drake Stapleton <drake.aien@proton.me>"]
+authors = ["Drake Stapleton <aien@aienos.com>"]
 description = "Native Rust GitHub Action and CLI for diff auditing, zero-telemetry enforcement, and automated repository triage"
 license = "SRCL-1.0"
 repository = "https://github.com/aien-dev/spark-inquisitor"

@@ -1,6 +1,6 @@
 name: "Sovereign Inquisitor"
 description: "Ultra-fast compiled native Rust GitHub Action for diff auditing, zero-telemetry enforcement, and automated triage without Node.js CPU bloat."
-author: "Drake Stapleton <drake.aien@proton.me> & AIEN <aien.atlas@proton.me>"
+author: "Drake Stapleton <aien@aienos.com> & AIEN <aien@aienos.com>"
 
 inputs:
   command:
