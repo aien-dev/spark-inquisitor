@@ -1,3 +1,7 @@
+> Archived: this repository is no longer authoritative. Canonical home: https://github.com/aien-dev/aien-sovereign-core/tree/main/crates/spark-inquisitor
+>
+> History is preserved read-only. Open new work against the canonical home.
+
 # spark-inquisitor
 
 ### Native Rust GitHub Action & CLI for Diff Auditing and Issue Triage
