@@ -1,6 +1,6 @@
 use aien_evaluation_protocol::{
-    CanaryRollbackHarness, EvaluationPlan, Evaluator, EvaluatorDescriptor, EvaluatorStatus,
-    SoftwareP256Signer, Verdict, VerifierIdentity, VerifierSigner,
+    CanaryRollbackHarness, CryptographicTier, EvaluationPlan, Evaluator, EvaluatorDescriptor,
+    EvaluatorStatus, SoftwareP256Signer, Verdict, VerifierIdentity, VerifierSigner,
 };
 use aien_protocol_types::{ArtifactRef, Digest32, EvaluationId, Timestamp};
 use p256::ecdsa::SigningKey;
@@ -178,5 +178,7 @@ async fn test_inquisitor_canary_rollback_integration() {
     assert_eq!(receipt.receipt.verdict, Verdict::Fail);
 
     let verifying_key = signer.verifying_key();
-    assert!(receipt.verify(&verifying_key).unwrap());
+    assert!(receipt
+        .verify_with(&verifying_key, CryptographicTier::Tier2SoftwareKey)
+        .unwrap());
 }
